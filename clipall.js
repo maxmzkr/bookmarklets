@@ -1,14 +1,37 @@
 javascript:(
   function() {
+    var ignoreList = [
+      "Online Exclusive",
+      "Adult Beverages",
+      "Baby",
+      "Electronics",
+      "Women's Apparel",
+      "Men's Apparel",
+    ];
     function makeRequest(listOfCoupons, currentIndex) {
+      console.log("Current index " + currentIndex);
       if (currentIndex >= listOfCoupons.length) {
+        console.log("hit end of list");
         return;
       }
       var c = listOfCoupons[currentIndex];
       if (c["offer"]["hatText"] == "Online Exclusive") {
+        console.log("Skipping online coupon " + c["offer"]["description"]);
         makeRequest(listOfCoupons, currentIndex+1);
         return;
       }
+      if (c["offer"]["description"].toLowerCase().match(/\Wcat\W/) !== null && c["offer"]["description"].toLowerCase().match(/\Wdog\W/) === null) {
+        console.log("Skipping cat coupon " + c["offer"]["description"]);
+        makeRequest(listOfCoupons, currentIndex+1);
+        return;
+      }
+      if (ignoreList.includes(c["offer"]["category"]["segmentName"])) {
+        console.log("Skipping coupon by category " + c["offer"]["description"] + " " + c["offer"]["category"]["segmentName"]);
+        makeRequest(listOfCoupons, currentIndex+1);
+        return;
+      }
+      
+      console.log("Clipping " + c["offer"]["description"]);
       fetch("https://www.meijer.com/bin/meijer/card/clip-unclip?meijerOfferId=" + c.offer.meijerOfferId + "&action=Clip&timestamp=1609165114465", {
         "headers": {
           "accept": "application/json,text/plain, */*",
@@ -47,10 +70,10 @@ javascript:(
       },
       "referrer": "https://www.meijer.com/mperks/coupons.html",
       "referrerPolicy": "strict-origin-when-cross-origin",
-      "body": "{\"searchCriteria\":\"\",\"sortType\":0,\"clippedFromTS\":null,\"pageSize\":9999,\"currentPage\":1,\"ceilingCount\":0,\"ceilingDuration\":0,\"rewardCouponId\":0,\"categoryId\":\"L5-000076,L5-000015,L5-000024,L5-000013,L5-000068,L5-000011,L5-000054,L5-000002,L5-000064,L5-000019,L5-000059,L5-000016,L5-000065,L5-000001,L5-000017,L5-000056,20201227inad,\",\"offerClass\":1,\"tagId\":\"\",\"getOfferCountPerDepartment\":false,\"upcId\":0,\"showClippedCoupons\":false,\"showOnlySpecialOffers\":false,\"showRedeemedOffers\":false,\"offerIds\":[],\"showBackToAllCoupons\":false,\"type\":1}",
+      "body": "{\"searchCriteria\":\"\",\"sortType\":0,\"clippedFromTS\":null,\"pageSize\":9999,\"currentPage\":1,\"ceilingCount\":0,\"ceilingDuration\":0,\"rewardCouponId\":0,\"categoryId\":null,\"offerClass\":1,\"tagId\":\"\",\"getOfferCountPerDepartment\":false,\"upcId\":0,\"showClippedCoupons\":false,\"showOnlySpecialOffers\":false,\"showRedeemedOffers\":false,\"offerIds\":[],\"showBackToAllCoupons\":false,\"type\":1}",
       "method": "POST",
       "mode": "cors",
       "credentials": "include"
-    }).then(a => a.json().then(b => makeRequest(b.listOfCoupons, 0)));
+    }).then(a => a.json().then(b => {console.log(b.listOfCoupons); makeRequest(b.listOfCoupons, 0)}));
   }
 )();

@@ -1,6 +1,6 @@
 # bookmarklets
 
-[krogerClip](function(){
+[krogerClip](javascript:(function(){
   async function test() {
     let cartResp = await fetch("https://www.kroger.com/atlas/v1/recommendations/v1/start-my-cart", {
       "headers": {
@@ -111,4 +111,4 @@
     await clipUpcs(recentJson.products.map(x => x.upc));
    }
   test();
-})
+})())
